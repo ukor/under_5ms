@@ -1,0 +1,26 @@
+FROM node:20-slim
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+WORKDIR /srv
+
+# copy the configuration files first to cache dependencies
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY packages ./packages
+# Copy all app package.json files to ensure the workspace is valid
+COPY apps/apigateway/package.json ./apps/apigateway/
+COPY apps/customer/package.json ./apps/customer/
+COPY apps/order/package.json ./apps/order/
+COPY apps/payment/package.json ./apps/payment/
+COPY apps/product/package.json ./apps/product/
+
+# Install ALL dependencies (including devDependencies like tsx/nodemon)
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+# the source code will be mount via Docker Compose volumes.
+
+EXPOSE 3012 3013 3014 3015 3016
+
+# a generic CMD that can be override in docker-compose
+CMD ["pnpm", "dev"]

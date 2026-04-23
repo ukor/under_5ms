@@ -1,0 +1,27 @@
+FROM node:20-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+
+WORKDIR /srv
+COPY . .
+
+FROM base AS build
+# install dependencies
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+# Build the specific app (replace 'apigateway' with the actual package name)
+RUN pnpm --filter apigateway build
+
+# --- STAGE 2: Production Image ---
+FROM node:20-slim AS runner
+WORKDIR /srv
+RUN corepack enable
+
+# Copy only the necessary build artifacts and node_modules
+# We copy from the root to maintain workspace paths for internal links
+COPY --from=build /srv /srv
+
+EXPOSE 3012
+CMD [ "pnpm", "--filter", "apigateway", "start" ]

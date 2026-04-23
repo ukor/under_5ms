@@ -1,0 +1,129 @@
+services:
+  backend:
+    container_name: under5ms-backend
+    build:
+      context: ./
+      dockerfile: ./apps/apigateway/dockerfile
+    environment:
+      - MONGO_NAME=${MONGO_NAME}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_SECRET=${JWT_SECRET}
+      - APP_NAME=${app_name}
+      - port=${port}
+      - NODE_ENV=${environment}
+    ports:
+      - '3012:3012'
+    depends_on:
+      - mongodb:
+          condition: service_healthy
+    volumes:
+      - .:/srv
+      - /srv/node_modules
+    restart: unless-stopped
+    networks:
+      - under5ms-network
+
+  frontend:
+    container_name: under5ms-frontend
+    build:
+      context: ./
+      dockerfile: ./apps/customer/dockerfile
+    environment:
+      - MONGO_NAME=${MONGO_NAME}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_SECRET=${JWT_SECRET}
+      - APP_NAME=${app_name}
+      - port=${port}
+      - NODE_ENV=${environment}
+    ports:
+      - '3013:3013'
+    depends_on:
+      - mongodb
+      - apigateway
+    volumes:
+      - .:/srv
+      - /srv/node_modules
+    restart: unless-stopped
+    networks:
+      - under5ms-network
+
+  docs:
+    container_name: under5ms-docs
+    build:
+      context: ./
+      dockerfile: ./apps/order/dockerfile
+    environment:
+      - MONGO_NAME=${MONGO_NAME}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_SECRET=${JWT_SECRET}
+      - APP_NAME=${app_name}
+      - port=${port}
+      - NODE_ENV=${environment}
+    ports:
+      - '3014:3014'
+    depends_on:
+      - mongodb
+      - apigateway
+    volumes:
+      - .:/srv
+      - /srv/node_modules
+    restart: unless-stopped
+    networks:
+      - under5ms-network
+
+  # start the mongodb service as container
+  mongodb:
+    image: mongo:6.0
+    container_name: mongo-server
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping')"]
+      interval: 15s
+      timeout: 7s
+      retries: 5
+    networks:
+      - under5ms-network
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=admin
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=passwordRoot
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: aka-rabbitmq
+    restart: unless-stopped
+    ports:
+      - '5672:5672'   # RabbitMQ Port
+      - '15672:15672' # Management UI Port
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - under5ms-network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+networks:
+  under5ms-network:
+
+volumes:
+  mongo_data:
+  rabbitmq_data:

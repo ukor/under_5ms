@@ -1,0 +1,50 @@
+{
+	"$schema": "http://json.schemastore.org/tsconfig",
+	"compilerOptions": {
+		"moduleResolution": "NodeNext",
+		"module": "NodeNext",
+
+		"rootDir": "./src",
+		"outDir": "./build",
+
+		"target": "es2022",
+		"lib": ["es2022"],
+
+		"allowJs": true,
+		"sourceMap": true,
+		"removeComments": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"strictFunctionTypes": true,
+		"noImplicitThis": true,
+		"alwaysStrict": true,
+
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"allowSyntheticDefaultImports": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+
+		"resolveJsonModule": true,
+
+		"skipDefaultLibCheck": true,
+		"skipLibCheck": true
+	},
+	"exclude": [
+		"node_modules",
+		"../node_modules",
+		"../../node_modules",
+		".pnpm",
+		"pm2.config.js",
+		"**/*.test.*",
+		"**/__mocks__/*",
+		"**/__tests__/*"
+	],
+	"include": ["./src/**/*.ts", "env.d.ts"]
+}

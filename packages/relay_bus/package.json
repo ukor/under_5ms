@@ -1,0 +1,41 @@
+{
+	"name": "@aka/relay_bus",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"check-types": "tsc --noEmit",
+		"dev": "tsup --watch",
+		"build": "tsc -b"
+	},
+	"files": [
+		"dist/**"
+	],
+	"exports": {
+		"./message_queue": {
+			"types": "./dist/message_queue.d.ts",
+			"default": "./dist/message_queue.js"
+		},
+		"./http_responder": {
+			"types": "./dist/http_responder.d.ts",
+			"default": "./dist/http_responder.js"
+		},
+		"./http": {
+			"types": "./dist/http.d.ts",
+			"default": "./dist/http.js"
+		}
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.23.0",
+	"devDependencies": {
+		"tsup": "^8.5.1"
+	},
+	"dependencies": {
+		"@aka/shared_types": "workspace:*",
+		"fastify": "catalog:fastify",
+		"got": "catalog:http_client"
+	}
+}

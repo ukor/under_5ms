@@ -1,0 +1,52 @@
+{
+	"name": "backend",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"vitest": "vitest",
+		"build": "tsc -b ",
+		"dev": "cross-env environment=dev nodemon"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.23.0",
+	"dependencies": {
+		"@fastify/autoload": "^6.3.1",
+		"@fastify/cors": "^11.2.0",
+		"@fastify/helmet": "^13.0.2",
+		"@fastify/sensible": "^6.0.4",
+		"@fastify/sse": "0.4.0",
+		"@fastify/swagger": "^9.7.0",
+		"@fastify/swagger-ui": "^5.2.5",
+
+		"@t3-oss/env-core": "^0.13.10",
+		"close-with-grace": "^2.5.0",
+		"compression": "^1.8.1",
+		"cookie-parser": "^1.4.7",
+		"cors": "^2.8.6",
+		"cross-env": "^10.1.0",
+		"dotenv": "^17.3.1",
+		"fastify": "catalog:fastify",
+		"fastify-plugin": "^5.1.0",
+		"fastify-type-provider-zod": "catalog:fastify_util",
+		"got": "catalog:http_client",
+		"helmet": "^8.1.0",
+		"mongodb": "catalog:database",
+		"morgan": "^1.10.1",
+		"zod": "catalog:default"
+	},
+	"devDependencies": {
+		"@aka/relay_bus": "workspace:*",
+		"@aka/shared_types": "workspace:*",
+
+		"@types/compression": "^1.8.1",
+		"@types/cookie-parser": "^1.4.10",
+		"@types/cors": "^2.8.19",
+		"@types/helmet": "^4.0.0",
+		"@types/morgan": "^1.9.10"
+	}
+}

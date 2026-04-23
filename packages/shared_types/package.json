@@ -1,0 +1,62 @@
+{
+	"name": "@aka/shared_types",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"check-types": "tsc --noEmit",
+		"dev": "tsc --watch",
+		"build": "tsc"
+	},
+	"files": [
+		"dist/**"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./*": {
+			"types": "./dist/*.d.ts",
+			"default": "./dist/*.js"
+		},
+		"./environment": {
+			"types": "./dist/app_environment.d.ts",
+			"default": "./dist/app_environment.js"
+		},
+		"./http_response": {
+			"types": "./dist/http_response.d.ts",
+			"default": "./dist/http_response.js"
+		},
+		"./exception": {
+			"types": "./dist/exception.d.ts",
+			"default": "./dist/exception.js"
+		},
+		"./order": {
+			"types": "./dist/order.d.ts",
+			"default": "./dist/order.js"
+		},
+		"./amount": {
+			"types": "./dist/amount.d.ts",
+			"default": "./dist/amount.js"
+		},
+		"./payment": {
+			"types": "./dist/payment.d.ts",
+			"default": "./dist/payment.js"
+		}
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.23.0",
+	"devDependencies": {
+		"tsup": "^8.5.1"
+	},
+	"dependencies": {
+		"fastify": "catalog:fastify",
+		"fastify-type-provider-zod": "catalog:fastify_util",
+		"mongodb": "catalog:database",
+		"zod": "catalog:default"
+	}
+}
