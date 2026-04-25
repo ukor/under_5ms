@@ -32,7 +32,11 @@ export async function* deployer(deploymentId: string, signal: AbortSignal) {
 			yield {
 				id: `${deploymentId}.${messageId}`,
 				event: "output",
-				data: chunk.toString().trim(),
+				data: {
+					messageId: `${deploymentId}.${messageId}`,
+					content: chunk.toString().trim(),
+					timestamp: new Date(),
+				},
 			};
 		}
 
@@ -43,7 +47,11 @@ export async function* deployer(deploymentId: string, signal: AbortSignal) {
 			yield {
 				id: `${deploymentId}.${messageId}`,
 				event: "output",
-				data: chunk.toString().trim(),
+				data: {
+					messageId: `${deploymentId}.${messageId}`,
+					content: chunk.toString().trim(),
+					timestamp: new Date(),
+				},
 			};
 		}
 	} catch (error: any) {
@@ -56,7 +64,11 @@ export async function* deployer(deploymentId: string, signal: AbortSignal) {
 		yield {
 			id: `${deploymentId}.0`,
 			event: "error",
-			data: error.toString().trim(),
+			data: {
+				messageId: `${deploymentId}.0`,
+				content: error.toString().trim(),
+				timestamp: new Date(),
+			},
 		};
 	} finally {
 		if (!command.killed) {
@@ -66,7 +78,11 @@ export async function* deployer(deploymentId: string, signal: AbortSignal) {
 			yield {
 				id: `${deploymentId}.${messageId + 1}`,
 				event: "end",
-				data: "Process finished",
+				data: {
+					messageId: `${deploymentId}.${messageId + 1}`,
+					content: "Processed finished",
+					timestamp: new Date(),
+				},
 			};
 		}
 	}
