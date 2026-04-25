@@ -16,12 +16,19 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - APP_NAME=apigateway
       - port=${PORT_APIGATEWAY}
+      - PG_HOST=postgresql
+      - PG_PORT=5432
+      - PG_USER=${PG_USER}
+      - PG_PASSWORD=${PG_PASSWORD}
+      - PG_DB=${PG_DB}
       - NODE_ENV=${environment}
     ports:
       - '3012:3012'
     depends_on:
       mongodb:
           condition: service_healthy
+      postgresql:
+        condition: service_healthy
     volumes:
       - .:/srv
       - /srv/node_modules
@@ -90,6 +97,26 @@ services:
     networks:
       - under5ms-network
 
+  postgresql:
+    image: postgres:15-alpine
+    container_name: postgres-server
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=${PG_USER:-admin}
+      - POSTGRES_PASSWORD=${PG_PASSWORD:-password123}
+      - POSTGRES_DB=${PG_DB:-under5ms_db}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-admin} -d ${PG_DB:-under5ms_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - under5ms-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   # start the mongodb service as container
   mongodb:
     image: mongo:6.0
@@ -116,4 +143,4 @@ services:
 
 volumes:
   mongo_data:
-  rabbitmq_data:
+  postgres_data:
