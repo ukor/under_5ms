@@ -1,4 +1,11 @@
 import { spawn } from "node:child_process";
+import { setTimeout } from "node:timers/promises";
+
+import {
+	gitDeploymentSteps,
+	zipDeploymentSteps,
+} from "../dummies/deployment_steps.dummy.js";
+import { createHash } from "node:crypto";
 
 // const command = spawn("ls", ["-lh", "/usr"]);
 
@@ -20,6 +27,74 @@ export function stopDeployment(id: string) {
 	return false;
 }
 
+export async function* gitDeploymentSimulation(gitUrl: string) {
+	// ---
+
+	const deploymentId = createHash("sha256")
+		.update(gitUrl + Date.now())
+		.digest("hex");
+
+	let messageId = 0;
+	for (const step of gitDeploymentSteps) {
+		messageId++;
+		const randomNumber = Math.floor(Math.random() * 2000) + 1;
+		await setTimeout(1000 + randomNumber + messageId);
+		yield {
+			id: `${deploymentId}.${messageId}`,
+			event: "stdout",
+			data: {
+				messageId: `${deploymentId}.${messageId}`,
+				content: step,
+				timestamp: new Date(),
+			},
+		};
+	}
+
+	yield {
+		id: `${deploymentId}.${messageId + 1}`,
+		event: "end",
+		data: {
+			messageId: `${deploymentId}.${messageId + 1}`,
+			content: "Processed finished",
+			timestamp: new Date(),
+		},
+	};
+}
+
+export async function* fileUploadDeploymentSimulation(gitUrl: string) {
+	// ---
+
+	const deploymentId = createHash("sha256")
+		.update(gitUrl + Date.now())
+		.digest("hex");
+
+	let messageId = 0;
+	for (const step of zipDeploymentSteps) {
+		messageId++;
+		const randomNumber = Math.floor(Math.random() * 2000) + 1;
+		await setTimeout(1000 + randomNumber + messageId);
+		yield {
+			id: `${deploymentId}.${messageId}`,
+			event: "stdout",
+			data: {
+				messageId: `${deploymentId}.${messageId}`,
+				content: step,
+				timestamp: new Date(),
+			},
+		};
+	}
+
+	yield {
+		id: `${deploymentId}.${messageId + 1}`,
+		event: "end",
+		data: {
+			messageId: `${deploymentId}.${messageId + 1}`,
+			content: "Processed finished",
+			timestamp: new Date(),
+		},
+	};
+}
+
 export async function* deployer(deploymentId: string, signal: AbortSignal) {
 	// Node automatically sends SIGTERM to the process when controller.abort is called
 	const command = spawn("ping", ["-c", "100", "localhost"], { signal });
@@ -31,7 +106,7 @@ export async function* deployer(deploymentId: string, signal: AbortSignal) {
 			messageId++;
 			yield {
 				id: `${deploymentId}.${messageId}`,
-				event: "output",
+				event: "stdout",
 				data: {
 					messageId: `${deploymentId}.${messageId}`,
 					content: chunk.toString().trim(),
@@ -46,7 +121,7 @@ export async function* deployer(deploymentId: string, signal: AbortSignal) {
 			messageId++;
 			yield {
 				id: `${deploymentId}.${messageId}`,
-				event: "output",
+				event: "stderr",
 				data: {
 					messageId: `${deploymentId}.${messageId}`,
 					content: chunk.toString().trim(),

@@ -7,6 +7,7 @@ import {
 	TriggerDeploymentResponse,
 	TriggerDeploymentResponsePayload,
 	DeploymentStatus,
+	DeploymentsResponse,
 } from "@aka/shared_types/deployment";
 import { httpResponse } from "@aka/relay_bus/http_responder";
 
@@ -80,7 +81,7 @@ export default async function (fastify: FastifyInstance) {
 				description: "allow user to fetch all deployment",
 				tags: ["deploy"],
 				response: {
-					200: TriggerDeploymentResponse,
+					200: DeploymentsResponse,
 					"3xx": HttpErrorResponseDto,
 					"4xx": HttpErrorResponseDto,
 					"5xx": HttpErrorResponseDto,
@@ -90,10 +91,24 @@ export default async function (fastify: FastifyInstance) {
 			handler: async (_request: FastifyRequest, reply: FastifyReply) => {
 				// ---
 
-				return httpResponse<TriggerDeploymentResponsePayload>(reply, {
-					status: DeploymentStatus.enum.pending,
-					deploymentId: "1223445667788",
-				});
+				return httpResponse<TriggerDeploymentResponsePayload[]>(reply, [
+					{
+						status: DeploymentStatus.enum.pending,
+						deploymentId: "1",
+					},
+					{
+						status: DeploymentStatus.enum.pending,
+						deploymentId: "2",
+					},
+					{
+						status: DeploymentStatus.enum.running,
+						deploymentId: "3",
+					},
+					{
+						status: DeploymentStatus.enum.building,
+						deploymentId: "4",
+					},
+				]);
 			},
 		});
 	});

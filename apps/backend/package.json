@@ -15,6 +15,7 @@
 	"license": "ISC",
 	"packageManager": "pnpm@10.23.0",
 	"dependencies": {
+		"@aka/shared_types": "workspace:*",
 		"@fastify/autoload": "^6.3.1",
 		"@fastify/cors": "^11.2.0",
 		"@fastify/helmet": "^13.0.2",
@@ -41,7 +42,6 @@
 	},
 	"devDependencies": {
 		"@aka/relay_bus": "workspace:*",
-		"@aka/shared_types": "workspace:*",
 
 		"@types/compression": "^1.8.1",
 		"@types/cookie-parser": "^1.4.10",
