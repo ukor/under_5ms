@@ -40,3 +40,12 @@ export type TriggerDeploymentResponse = z.infer<
 z.globalRegistry.add(TriggerDeploymentResponse, {
 	id: "TriggerDeploymentResponse",
 });
+
+export const DeploymentsResponse = HttpResponseDto.extend({
+	result: z.array(TriggerDeploymentResponsePayload),
+});
+
+export type DeploymentsResponse = z.infer<typeof DeploymentsResponse>;
+z.globalRegistry.add(DeploymentsResponse, {
+	id: "DeploymentsResponse",
+});

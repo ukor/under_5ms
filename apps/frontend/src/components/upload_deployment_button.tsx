@@ -6,9 +6,12 @@ import {
 	Portal,
 	Text,
 } from "@chakra-ui/react";
+import type { FC } from "react";
 import { HiUpload } from "react-icons/hi";
 
-function DeployWithUpload() {
+interface DeployWithUploadProps { }
+
+const DeployWithUpload: FC<DeployWithUploadProps> = () => {
 	return (
 		<Dialog.Root placement="center" motionPreset="slide-in-bottom">
 			<Dialog.Trigger asChild>
@@ -47,6 +50,6 @@ function DeployWithUpload() {
 			</Portal>
 		</Dialog.Root>
 	);
-}
+};
 
 export default DeployWithUpload;

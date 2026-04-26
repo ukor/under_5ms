@@ -1,23 +1,15 @@
 import got, { Got, Options, Method } from "got";
-import { ServiceNames, ServiceUrls } from "@aka/shared_types/app_environment";
 
 export class Http {
 	private constructor(private readonly got: Got<Options>) {}
 
-	static serviceUrls: ServiceUrls = {
-		[ServiceNames.enum.customer]: "http://customer:3013",
-		[ServiceNames.enum.order]: "http://order:3014",
-		[ServiceNames.enum.payment]: "http://payment:3015",
-		[ServiceNames.enum.product]: "http://product:3016",
-	};
-
-	private static getServiceUrl(name: ServiceNames) {
-		return Http.serviceUrls[name];
+	private static getServiceUrl() {
+		return "";
 	}
 
-	static init(serviceName: ServiceNames) {
+	static init() {
 		const options = new Options({
-			prefixUrl: Http.getServiceUrl(serviceName),
+			prefixUrl: Http.getServiceUrl(),
 			headers: {
 				foo: "foo",
 				"x-apigateway": "",
