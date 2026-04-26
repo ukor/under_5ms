@@ -1,105 +1,81 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./App.css";
-import { Box, Flex, Heading, Highlight, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text } from "@chakra-ui/react";
 import DeployWithGit from "./components/git_deployment_button";
 import DeployWithUpload from "./components/upload_deployment_button";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	getDeployments,
+	startDeploymentWithGit,
+} from "./commons/deployment.service";
+import DeployItem from "./components/deploy_item";
+import { useDeploymentLogs } from "./commons/hooks/log.hook";
 
-interface Message {
-	messageId: string;
-	content: string;
-	timestamp: string;
-}
-
-export interface SSEMessage {
-	/**
-	 * Event ID for tracking
-	 */
-	id?: string;
-
-	/**
-	 * Event type name
-	 */
-	event?: string;
-
-	/**
-	 * Event data payload
-	 */
-	data: Message;
-
-	/**
-	 * Retry interval in milliseconds
-	 */
-	retry?: number;
+interface Build {
+	buildId: string;
+	buildStatus: string;
+	createdAt: string; // Date
 }
 
 function App() {
-	const [messages, setMessages] = useState<Message[]>([]);
-	const [isConnected, setIsConnected] = useState<boolean>(false);
-	const [error, setError] = useState<string | null>(null);
+	const queryClient = useQueryClient();
+
+	const [builds, setBuilds] = useState<Build[]>([]);
+	const [activeDeploymentId, setActiveDeploymentId] = useState<string | null>(
+		null,
+	);
+
+	const { logMessages, error } = useDeploymentLogs(activeDeploymentId);
+
+	const deploymentsResponse = useQuery({
+		queryKey: ["get_all_deployments"],
+		queryFn: () => getDeployments({}),
+	});
 
 	useEffect(() => {
-		// Create EventSource connection
-		const eventSource: EventSource = new EventSource(
-			"http://localhost:3012/v1/deployment-logs",
+		if (
+			deploymentsResponse.status === "success" &&
+			deploymentsResponse.data.length > 0
+		) {
+			setActiveDeploymentId(deploymentsResponse.data[0].deploymentId);
+		}
+	}, [deploymentsResponse.status]);
+
+	const createDeploymentFromGitUrl = useMutation({
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({
+				queryKey: ["get_all_deployments"],
+				exact: true,
+			});
+		},
+		mutationFn: (arg: any) => {
+			return startDeploymentWithGit(arg);
+		},
+	});
+
+	const logEndRef = useRef<HTMLDivElement>(null);
+
+	const scrollToBottom = () => {
+		logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	};
+
+	// Scroll every time the messages array updates
+	useEffect(() => {
+		scrollToBottom();
+	}, [logMessages]);
+
+	const handleViewDeploymentLog = useCallback((deploymentId: string) => {
+		console.log(
+			`View deployment button clicked, deploymentId: ${deploymentId}`,
 		);
 
-		eventSource.onopen = () => {
-			setIsConnected(true);
-			setError(null);
-		};
-
-		eventSource.onmessage = (event) => {
-			try {
-				const message: Message = JSON.parse(event.data);
-				setMessages((prev) => [...prev, message]);
-			} catch (err) {
-				console.error("Failed to parse message:", err);
-			}
-		};
-
-		eventSource.addEventListener("output", (event: MessageEvent<Message>) => {
-			console.log(event);
-			console.log(event.data);
-			setMessages((prev) => [...prev, event.data]);
-		});
-
-		eventSource.addEventListener("error", (event: MessageEvent<Message>) => {
-			console.log(event);
-			console.log(event.data);
-			setMessages((prev) => [...prev, event.data]);
-		});
-
-		eventSource.addEventListener("end", (event: MessageEvent<Message>) => {
-			console.log(event);
-			console.log(event.data);
-			setMessages((prev) => [...prev, event.data]);
-
-			eventSource.close();
-		});
-
-		eventSource.onerror = (event) => {
-			// EventSource will automatically reconnect
-			setIsConnected(false);
-			// Error is set ONLY if connection is completely closed
-			if (eventSource.readyState === EventSource.CLOSED) {
-				setError("Connection closed. Please refresh the page.");
-			}
-		};
-
-		// Cleanup on unmount
-		return () => {
-			eventSource.close();
-		};
-	}, []);
-
-	const handleClick = useCallback(() => {
-		console.log("Button clicked, count is:");
+		setActiveDeploymentId(deploymentId);
 	}, []);
 
 	return (
 		<Box padding={10}>
 			<Box paddingBottom={10}>
-				<DeployWithGit />
+				<DeployWithGit onDeployStart={createDeploymentFromGitUrl} />
 				<DeployWithUpload />
 			</Box>
 			<Flex direction="row" gap="8">
@@ -111,59 +87,20 @@ function App() {
 						divideStyle="dashed"
 						divideColor="teal.400"
 					>
-						<Box
-							padding={2}
-							marginY={2}
-							borderRadius="md"
-							borderWidth="1px"
-							focusRing="mixed"
-							data-focus
-						>
-							<Heading size="sm">Build #112233</Heading>
+						{deploymentsResponse.status === "error" && (
 							<Text>
-								<Highlight
-									query={[
-										"pending",
-										"building",
-										"deploying",
-										"running",
-										"failed",
-									]}
-									styles={{ px: "0.5", bg: "teal.muted" }}
-								>
-									Build Status: pending
-								</Highlight>
+								{deploymentsResponse.error?.message ??
+									String(deploymentsResponse.error)}
 							</Text>
-						</Box>
-
-						<Box
-							padding={2}
-							marginY={2}
-							borderRadius="md"
-							borderWidth="1px"
-							focusRing="mixed"
-							data-focus
-						>
-							<Heading size="sm">Build #112233</Heading>
-							<Text>
-								<Highlight
-									query={[
-										"pending",
-										"building",
-										"deploying",
-										"running",
-										"failed",
-									]}
-									styles={{ px: "0.5", bg: "teal.muted" }}
-								>
-									Build Status: pending
-								</Highlight>
-							</Text>
-						</Box>
+						)}
+						{deploymentsResponse.status === "success" &&
+							deploymentsResponse.data.map((b) => (
+								<DeployItem onViewLog={handleViewDeploymentLog} build={b} />
+							))}
 					</Box>
 				</Box>
 				<Box height={45} width="50dvw">
-					<Heading size="md">Build Logs</Heading>
+					<Heading size="md">Build #{activeDeploymentId} Logs</Heading>
 					<Box
 						padding={2}
 						width="50dvw"
@@ -174,13 +111,15 @@ function App() {
 						data-focus
 						overflowY="auto"
 					>
-						{messages.map((msg) => (
+						{logMessages.map((msg) => (
 							<Flex direction="row" gap={2} key={msg.messageId}>
-								<Text className="timestamp">{msg.timestamp}</Text>
+								<Text>-</Text>
+								{/* <Text className="timestamp">{msg.timestamp}</Text> */}
 								<Text className="content">{msg.content}</Text>
 							</Flex>
 						))}
 						<Text>{error}</Text>
+						<div ref={logEndRef} />
 					</Box>
 				</Box>
 			</Flex>

@@ -7,9 +7,16 @@ import {
 	Portal,
 	Text,
 } from "@chakra-ui/react";
-import { HiUpload } from "react-icons/hi";
+import type { UseMutationResult } from "@tanstack/react-query";
+import { useState, type FC } from "react";
 
-function DeployWithGit() {
+interface DeployWithGitProps {
+	onDeployStart: UseMutationResult;
+}
+
+const DeployWithGit: FC<DeployWithGitProps> = ({ onDeployStart }) => {
+	const [gitUrl, setGitUrl] = useState("");
+
 	return (
 		<Dialog.Root placement="center" motionPreset="slide-in-bottom">
 			<Dialog.Trigger asChild>
@@ -28,7 +35,7 @@ function DeployWithGit() {
 								<Field.Label>
 									<Field.RequiredIndicator />
 								</Field.Label>
-								<Input />
+								<Input onChange={(e) => setGitUrl(e.target.value)} />
 								<Field.HelperText />
 								<Field.ErrorText />
 							</Field.Root>
@@ -37,7 +44,7 @@ function DeployWithGit() {
 							<Dialog.ActionTrigger asChild>
 								<Button variant="outline">Cancel</Button>
 							</Dialog.ActionTrigger>
-							<Button>Save</Button>
+							<Button onClick={() => onDeployStart.mutate(gitUrl)}>Save</Button>
 						</Dialog.Footer>
 						<Dialog.CloseTrigger asChild>
 							<CloseButton size="sm" />
@@ -47,6 +54,6 @@ function DeployWithGit() {
 			</Portal>
 		</Dialog.Root>
 	);
-}
+};
 
 export default DeployWithGit;
