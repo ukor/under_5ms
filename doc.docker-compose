@@ -1,0 +1,21 @@
+docs:
+    container_name: docs-dev
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.dev
+      args:
+        - APP_NAME=order
+    command: pnpm --if-present --filter order run dev
+    environment:
+      - APP_NAME=documentation
+      - port=${PORT_DOCUMENTATION}
+      - NODE_ENV=${environment}
+    ports:
+      - '3014:3014'
+    volumes:
+      - .:/srv
+      - /srv/node_modules
+    restart: unless-stopped
+    networks:
+      - under5ms-network
+

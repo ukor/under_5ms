@@ -1,10 +1,10 @@
 import Axios from "axios";
 
 export const endpoints: Record<string, string> = Object.freeze({
-	default: "http://127.0.0.1:3012",
+	default: "http://localhost/api",
 	local: "http://127.0.0.1:3012",
 	// development: 'http://localhost:40025',
-	docker: "http://frontend:3012",
+	docker: "http://localhost/api",
 });
 
 const mode = import.meta.env.MODE;

@@ -27,12 +27,8 @@ export function stopDeployment(id: string) {
 	return false;
 }
 
-export async function* gitDeploymentSimulation(gitUrl: string) {
+export async function* gitDeploymentSimulation(deploymentId: string) {
 	// ---
-
-	const deploymentId = createHash("sha256")
-		.update(gitUrl + Date.now())
-		.digest("hex");
 
 	let messageId = 0;
 	for (const step of gitDeploymentSteps) {

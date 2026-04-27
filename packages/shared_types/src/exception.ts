@@ -165,6 +165,7 @@ export function fastifyErrorHandler(
 ) {
 	// ---
 
+	console.error(error);
 	const result: HttpErrorResponseDto = {
 		type: "about:blank",
 		title: "",

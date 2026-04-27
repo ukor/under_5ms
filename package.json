@@ -7,7 +7,9 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"build:packages": "pnpm run --stream --if-present --filter './packages/**/**' build",
 		"build:apps": "pnpm run --stream --if-present --filter './apps/**/**' build",
-		"build": "pnpm run build:packages && pnpm run build:apps"
+		"build": "pnpm run build:packages && pnpm run build:apps",
+		"migrate:up": "./apps/backend/node_modules/.bin/node-pg-migrate --config migrate-config.js up",
+		"migrate:down": "./apps/backend/node_modules/.bin/node-pg-migrate --config migrate-config.js down"
 	},
 	"keywords": [],
 	"author": "",
@@ -26,5 +28,7 @@
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.18"
 	},
-	"dependencies": {}
+	"dependencies": {
+		"dotenv": "^17.3.1"
+	}
 }

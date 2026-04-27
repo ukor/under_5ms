@@ -10,9 +10,19 @@ import {
 	DeploymentsResponse,
 } from "@aka/shared_types/deployment";
 import { httpResponse } from "@aka/relay_bus/http_responder";
+import { PostgresDb } from "@fastify/postgres";
+import { DeploymentRepository } from "../repositories/deployment.repository.js";
+import { GitDeployService } from "../services/git_deployment.service.js";
+import { DeploymentService } from "../services/deploy.service.js";
 
 export default async function (fastify: FastifyInstance) {
 	// ---
+
+	const database: PostgresDb = fastify.pg;
+
+	const deploymentRepository = new DeploymentRepository(database);
+	const gitDeploymentService = new GitDeployService(deploymentRepository);
+	const deploymentService = new DeploymentService(deploymentRepository);
 
 	fastify.after(() => {
 		fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -31,14 +41,22 @@ export default async function (fastify: FastifyInstance) {
 				},
 			},
 			handler: async (
-				_request: FastifyRequest<{
+				request: FastifyRequest<{
 					Body: TriggerDeploymentWithGitRequestPayload;
 				}>,
 				reply: FastifyReply,
 			) => {
 				// ---
 
-				return httpResponse<Record<string, unknown>>(reply, {}, 201);
+				const deploy = await gitDeploymentService.deploy(request.body);
+
+				console.log(request.body, deploy, "<< deployment response");
+
+				return httpResponse<TriggerDeploymentResponsePayload>(
+					reply,
+					deploy,
+					201,
+				);
 			},
 		});
 	});
@@ -91,6 +109,7 @@ export default async function (fastify: FastifyInstance) {
 			handler: async (_request: FastifyRequest, reply: FastifyReply) => {
 				// ---
 
+				await deploymentService.getDeployment();
 				return httpResponse<TriggerDeploymentResponsePayload[]>(reply, [
 					{
 						status: DeploymentStatus.enum.pending,

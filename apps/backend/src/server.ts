@@ -9,7 +9,7 @@ import { appConfig } from "./configs/index.js";
 import { fastifyErrorHandler } from "@aka/shared_types/exception";
 
 const host = appConfig.HOST ?? "localhost";
-const port = appConfig.PORT ? Number(appConfig.PORT) : 3012;
+const port = appConfig.PORT_BACKEND ? Number(appConfig.PORT_BACKEND) : 3012;
 
 const server = Fastify({
 	logger: true,

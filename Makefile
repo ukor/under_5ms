@@ -17,6 +17,7 @@ clean:
 	$(FIND) -type d -name "node_modules" -exec $(RM) {} +
 	$(FIND) -type d -name "build" -exec $(RM) {} +
 	$(FIND) -type d -name "dist" -exec $(RM) {} +
+	docker compose -f docker-compose.dev.yaml down
 	@echo "Cleanup complete."
 
 
@@ -41,3 +42,11 @@ start_backend:
 start_frontend:
 	@echo "Starting Frontend application"
 	pnpm --filter="frontend" run dev
+
+.PHONY: docker_up
+docker_up:
+	docker compose -f docker-compose.dev.yaml up --build
+
+.PHONY: docker_down
+docker_down:
+	docker compose -f docker-compose.dev.yaml down

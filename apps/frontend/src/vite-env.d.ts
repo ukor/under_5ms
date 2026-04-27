@@ -1,0 +1,18 @@
+// See - https://vite.dev/guide/env-and-mode#intellisense-for-typescript
+
+interface ViteTypeOptions {
+	// By adding this line, you can make the type of ImportMetaEnv strict
+	// to disallow unknown keys.
+	// strictImportMetaEnv: unknown
+}
+
+interface ImportMetaEnv {
+	readonly VITE_APP_TITLE: string;
+	readonly VITE_ENVIRONMENT: string;
+	readonly VITE_APP_NAME: string;
+	readonly VITE_BASE_URL: string;
+}
+
+interface ImportMeta {
+	readonly env: ImportMetaEnv;
+}
