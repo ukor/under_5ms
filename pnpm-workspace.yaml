@@ -14,6 +14,9 @@ catalogs:
    "axios": "1.15.2"
  database:
    "mongodb": "7.1.0"
+   "pg": "8.20.0"
+   "node-pg-migrate": "8.0.4"
+   "@fastify/postgres": "6.0.2"
 
 
 enablePrePostScripts: true

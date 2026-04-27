@@ -20,7 +20,7 @@ export async function startDeploymentWithGit(
 		TriggerDeploymentWithGitRequestPayload,
 		AxiosResponse<TriggerDeploymentResponse>,
 		TriggerDeploymentWithGitRequestPayload
-	>("/v1/deploy/git", arg);
+	>("/v1/deploy/git", arg, { data: arg });
 
 	if (data.isError) {
 		throw new Error(data.detail);

@@ -14,9 +14,9 @@ services:
       - MONGO_HOST=${MONGO_HOST}
       - JWT_ALGORITHM=${JWT_ALGORITHM}
       - JWT_SECRET=${JWT_SECRET}
-      - APP_NAME=apigateway
-      - port=${PORT_APIGATEWAY}
-      - PG_HOST=postgresql
+      - APP_NAME=under_5ms_dev
+      - port=${PORT_BACKEND}
+      - PG_HOST=${PG_HOST}
       - PG_PORT=5432
       - PG_USER=${PG_USER}
       - PG_PASSWORD=${PG_PASSWORD}
@@ -27,7 +27,7 @@ services:
     depends_on:
       mongodb:
           condition: service_healthy
-      postgresql:
+      postgres:
         condition: service_healthy
     volumes:
       - .:/srv
@@ -46,20 +46,16 @@ services:
 
     command: pnpm --if-present --filter frontend run dev
     environment:
-      - MONGO_NAME=${MONGO_NAME}
-      - MONGO_USER=${MONGO_USER}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
-      - MONGO_HOST=${MONGO_HOST}
       - JWT_ALGORITHM=${JWT_ALGORITHM}
       - JWT_SECRET=${JWT_SECRET}
-      - APP_NAME=customer
-      - port=${PORT_CUSTOMER}
+      - APP_NAME=frontend
+      - port=${PORT_FRONTEND}
       - NODE_ENV=${environment}
     ports:
       - '3013:3013'
     depends_on:
       - mongodb
-      - apigateway
+      - backend
     volumes:
       - .:/srv
       - /srv/node_modules
@@ -67,37 +63,7 @@ services:
     networks:
       - under5ms-network
 
-  docs:
-    container_name: docs-dev
-    build:
-      context: ./
-      dockerfile: ./Dockerfile.dev
-      args:
-        - APP_NAME=order
-    command: pnpm --if-present --filter order run dev
-    environment:
-      - MONGO_NAME=${MONGO_NAME}
-      - MONGO_USER=${MONGO_USER}
-      - MONGO_PASSWORD=${MONGO_PASSWORD}
-      - MONGO_HOST=${MONGO_HOST}
-      - JWT_ALGORITHM=${JWT_ALGORITHM}
-      - JWT_SECRET=${JWT_SECRET}
-      - APP_NAME=order
-      - port=${PORT_ORDER}
-      - NODE_ENV=${environment}
-    ports:
-      - '3014:3014'
-    depends_on:
-      - mongodb
-      - apigateway
-    volumes:
-      - .:/srv
-      - /srv/node_modules
-    restart: unless-stopped
-    networks:
-      - under5ms-network
-
-  postgresql:
+  postgres:
     image: postgres:15-alpine
     container_name: postgres-server
     restart: unless-stopped
@@ -108,7 +74,7 @@ services:
       - POSTGRES_PASSWORD=${PG_PASSWORD:-password123}
       - POSTGRES_DB=${PG_DB:-under5ms_db}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-admin} -d ${PG_DB:-under5ms_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -116,6 +82,24 @@ services:
       - under5ms-network
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  caddy:
+    image: caddy:latest
+    container_name: caddy-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2019:2019"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - under5ms-network
+    depends_on:
+      - backend
+      - frontend
 
   # start the mongodb service as container
   mongodb:
@@ -138,9 +122,11 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=passwordRoot
 
-  networks:
+networks:
   under5ms-network:
 
 volumes:
   mongo_data:
   postgres_data:
+  caddy_data:
+  caddy_config:

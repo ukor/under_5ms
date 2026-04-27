@@ -1,0 +1,25 @@
+{
+    admin 0.0.0.0:2019
+}
+
+:80 {
+    # Route API requests to the backend
+    # Caddy will strips the /api prefix before sending to backend
+    handle_path /api/* {
+        reverse_proxy backend:3012
+    }
+
+    # Route Documentation requests
+    handle_path /docs/* {
+        reverse_proxy docs-dev:3014
+    }
+
+    # Fallback: Route everything else to the frontend
+    handle {
+        reverse_proxy frontend:3013
+    }
+
+    log {
+        output file /data/access.log
+    }
+}
